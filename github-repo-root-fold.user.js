@@ -1,14 +1,16 @@
 // ==UserScript==
 // @name         GitHub repo root: fold the file list
 // @namespace    https://github.com/churchilldu/github-repo-root-fold
-// @version      1.3.0
+// @version      1.4.0
 // @description  Folds the file listing on a repository's root page by default and adds a fold icon (in the latest-commit bar) to unfold it.
 // @homepageURL  https://github.com/churchilldu/github-repo-root-fold
 // @updateURL    https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
 // @downloadURL  https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
 // @match        https://github.com/*
 // @run-at       document-start
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
 // @noframes
 // ==/UserScript==
 
@@ -18,6 +20,8 @@
   const FOLDED_STORAGE_KEY = 'github-repo-root-fold:folded';
   const FOLDED_CLASS = 'gh-rlf-folded';
   const ACTIVE_CLASS = 'gh-rlf-active';
+  const COMPACT_CLASS = 'gh-rlf-compact';
+  const SHOW_COUNT_KEY = 'showItemCount';
 
   const REPO_ROOT_PATH = /^\/[^/]+\/[^/]+\/?$/;
   const DIRECTORY_CONTENT_SELECTOR = '[data-testid="directory-content"]';
@@ -31,7 +35,26 @@
 
   const root = document.documentElement;
 
-  root.classList.toggle(FOLDED_CLASS, localStorage.getItem(FOLDED_STORAGE_KEY) !== '0');
+  const isRepoRootPage = () => REPO_ROOT_PATH.test(location.pathname);
+  const foldPreference = () => localStorage.getItem(FOLDED_STORAGE_KEY) !== '0';
+
+  root.classList.toggle(FOLDED_CLASS, isRepoRootPage() && foldPreference());
+
+  let showItemCount = typeof GM_getValue === 'function' ? GM_getValue(SHOW_COUNT_KEY, true) : true;
+
+  function applyCountPreference() {
+    root.classList.toggle(COMPACT_CLASS, !showItemCount);
+  }
+
+  if (typeof GM_registerMenuCommand === 'function') {
+    GM_registerMenuCommand('Toggle file-list item count', () => {
+      showItemCount = !showItemCount;
+      GM_setValue(SHOW_COUNT_KEY, showItemCount);
+      applyCountPreference();
+    });
+  }
+
+  applyCountPreference();
 
   const style = document.createElement('style');
   style.textContent = `
@@ -65,6 +88,7 @@
     }
     .gh-rlf-toggle svg { flex: none; transition: rotate .15s ease; }
     html.${FOLDED_CLASS} .gh-rlf-toggle svg { rotate: -90deg; }
+    html.${COMPACT_CLASS} .gh-rlf-count { display: none; }
   `;
   root.appendChild(style);
 
@@ -74,6 +98,7 @@
   toggle.innerHTML = CHEVRON_DOWN;
 
   const countLabel = document.createElement('span');
+  countLabel.className = 'gh-rlf-count';
   toggle.appendChild(countLabel);
 
   function isFolded() {
@@ -108,15 +133,17 @@
   }
 
   function refresh() {
-    const directoryContent = REPO_ROOT_PATH.test(location.pathname)
+    const directoryContent = isRepoRootPage()
       ? document.querySelector(DIRECTORY_CONTENT_SELECTOR)
       : null;
 
     if (directoryContent === null) {
-      root.classList.remove(ACTIVE_CLASS);
+      root.classList.remove(ACTIVE_CLASS, FOLDED_CLASS);
       toggle.remove();
       return;
     }
+
+    root.classList.toggle(FOLDED_CLASS, foldPreference());
 
     const mountTarget = findMountTarget(directoryContent);
     if (toggle.parentElement !== mountTarget) mountTarget.prepend(toggle);
