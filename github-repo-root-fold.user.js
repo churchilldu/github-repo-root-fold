@@ -1,16 +1,14 @@
 // ==UserScript==
 // @name         GitHub repo root: fold the file list
 // @namespace    https://github.com/churchilldu/github-repo-root-fold
-// @version      1.4.0
+// @version      1.5.0
 // @description  Folds the file listing on a repository's root page by default and adds a fold icon (in the latest-commit bar) to unfold it.
 // @homepageURL  https://github.com/churchilldu/github-repo-root-fold
 // @updateURL    https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
 // @downloadURL  https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
 // @match        https://github.com/*
 // @run-at       document-start
-// @grant        GM_getValue
-// @grant        GM_setValue
-// @grant        GM_registerMenuCommand
+// @grant        none
 // @noframes
 // ==/UserScript==
 
@@ -20,12 +18,9 @@
   const FOLDED_STORAGE_KEY = 'github-repo-root-fold:folded';
   const FOLDED_CLASS = 'gh-rlf-folded';
   const ACTIVE_CLASS = 'gh-rlf-active';
-  const COMPACT_CLASS = 'gh-rlf-compact';
-  const SHOW_COUNT_KEY = 'showItemCount';
 
   const REPO_ROOT_PATH = /^\/[^/]+\/[^/]+\/?$/;
   const DIRECTORY_CONTENT_SELECTOR = '[data-testid="directory-content"]';
-  const DIRECTORY_ROW_SELECTOR = '.react-directory-row';
   const LATEST_COMMIT_SELECTOR = '[data-testid="latest-commit"]';
 
   const CHEVRON_DOWN =
@@ -40,22 +35,6 @@
 
   root.classList.toggle(FOLDED_CLASS, isRepoRootPage() && foldPreference());
 
-  let showItemCount = typeof GM_getValue === 'function' ? GM_getValue(SHOW_COUNT_KEY, true) : true;
-
-  function applyCountPreference() {
-    root.classList.toggle(COMPACT_CLASS, !showItemCount);
-  }
-
-  if (typeof GM_registerMenuCommand === 'function') {
-    GM_registerMenuCommand('Toggle file-list item count', () => {
-      showItemCount = !showItemCount;
-      GM_setValue(SHOW_COUNT_KEY, showItemCount);
-      applyCountPreference();
-    });
-  }
-
-  applyCountPreference();
-
   const style = document.createElement('style');
   style.textContent = `
     html.${FOLDED_CLASS} ${DIRECTORY_CONTENT_SELECTOR} { display: none !important; }
@@ -63,7 +42,6 @@
     .gh-rlf-toggle {
       display: none;
       align-items: center;
-      gap: 2px;
       height: 20px;
       margin-inline-start: -4px;
       padding: 0 4px;
@@ -88,7 +66,6 @@
     }
     .gh-rlf-toggle svg { flex: none; transition: rotate .15s ease; }
     html.${FOLDED_CLASS} .gh-rlf-toggle svg { rotate: -90deg; }
-    html.${COMPACT_CLASS} .gh-rlf-count { display: none; }
   `;
   root.appendChild(style);
 
@@ -97,24 +74,14 @@
   toggle.className = 'gh-rlf-toggle';
   toggle.innerHTML = CHEVRON_DOWN;
 
-  const countLabel = document.createElement('span');
-  countLabel.className = 'gh-rlf-count';
-  toggle.appendChild(countLabel);
-
   function isFolded() {
     return root.classList.contains(FOLDED_CLASS);
   }
 
-  function countItems() {
-    return document.querySelectorAll(DIRECTORY_ROW_SELECTOR).length;
-  }
-
   function syncToggle() {
     const folded = isFolded();
-    const count = countItems();
     const label = folded ? 'Unfold file list' : 'Fold file list';
-    countLabel.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
-    toggle.setAttribute('aria-label', `${label} (${countLabel.textContent})`);
+    toggle.setAttribute('aria-label', label);
     toggle.setAttribute('aria-expanded', String(!folded));
     toggle.title = label;
   }
