@@ -10,10 +10,16 @@ latest-commit bar unfolds it again.
 
 ## Install
 
-1. Install [Tampermonkey](https://www.tampermonkey.net/).
-2. Open [`github-repo-root-fold.user.js`](./github-repo-root-fold.user.js) and accept the install prompt
-   (or open the raw URL from your fork/branch).
+**[Install with Tampermonkey](https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js)** —
+one click; Tampermonkey opens its install prompt.
+
+1. Install [Tampermonkey](https://www.tampermonkey.net/) if you have not.
+2. Click the install link above (or open [`github-repo-root-fold.user.js`](./github-repo-root-fold.user.js)
+   and use the *Raw* button).
 3. Visit any repository root page.
+
+Updates come from `main` via `@updateURL` / `@downloadURL`; Tampermonkey checks them when
+`@version` changes.
 
 ## Behaviour
 

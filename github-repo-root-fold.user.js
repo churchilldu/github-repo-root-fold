@@ -1,8 +1,11 @@
 // ==UserScript==
 // @name         GitHub repo root: fold the file list
-// @namespace    https://github.com/jesse/github-repo-root-fold
-// @version      1.2.0
+// @namespace    https://github.com/churchilldu/github-repo-root-fold
+// @version      1.3.0
 // @description  Folds the file listing on a repository's root page by default and adds a fold icon (in the latest-commit bar) to unfold it.
+// @homepageURL  https://github.com/churchilldu/github-repo-root-fold
+// @updateURL    https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
+// @downloadURL  https://raw.githubusercontent.com/churchilldu/github-repo-root-fold/main/github-repo-root-fold.user.js
 // @match        https://github.com/*
 // @run-at       document-start
 // @grant        none
