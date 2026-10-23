@@ -5,7 +5,7 @@ A Tampermonkey userscript that folds the file listing on a repository's root pag
 latest-commit bar unfolds it again.
 
 ```
-‹chevron› 35 items   ·   9ffcb46 · Oct 21, 2026   ·   ⏱ History
+‹chevron› 35 items   (avatar) chengchuu  [rust-compiler] Fix Unicode …      9ffcb46 · Oct 21, 2026   ·   ⏱ History
 ```
 
 ## Install
@@ -20,8 +20,9 @@ latest-commit bar unfolds it again.
 - Only runs on repo root pages (`^/<owner>/<repo>/?$`), re-checked on Turbo soft navigation.
 - Folded by default; the state persists in `localStorage` under `github-repo-root-fold:folded`
   (`'1'` folded, `'0'` unfolded).
-- The toggle is a borderless ghost button mounted as the first control in the latest-commit
-  bar's trailing group, next to the commit SHA and the *History* link.
+- The toggle is a borderless ghost button prepended to the latest-commit row, so it sits at the
+  left edge of the strip, left of the author avatar, and is vertically centered by that row's
+  `align-items: center`.
 - Chevron points down when unfolded and right when folded; the label reports the item count.
 
 ## Why not an existing script
@@ -51,6 +52,8 @@ Tested against `github.com/facebook/react` (35 rows):
 | check | result |
 | --- | --- |
 | default state | listing `display:none`, chevron `-90deg` |
+| placement | first child of `[data-testid="latest-commit"]`, chevron x=45 (avatar x=120) |
+| vertical alignment | toggle centre y=339, strip centre y=339 |
 | toggle | listing `display:block`, `aria-expanded=true`, `localStorage` = `0` |
 | toggle back | listing `display:none`, `localStorage` = `1` |
 | re-render | toggle still mounted after expanding/collapsing commit details |

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub repo root: fold the file list
 // @namespace    https://github.com/jesse/github-repo-root-fold
-// @version      1.1.0
+// @version      1.2.0
 // @description  Folds the file listing on a repository's root page by default and adds a fold icon (in the latest-commit bar) to unfold it.
 // @match        https://github.com/*
 // @run-at       document-start
@@ -39,7 +39,9 @@
       align-items: center;
       gap: 2px;
       height: 20px;
+      margin-inline-start: -4px;
       padding: 0 4px;
+      white-space: nowrap;
       font: inherit;
       font-size: var(--text-body-size-small, 12px);
       line-height: 20px;
@@ -99,12 +101,7 @@
 
   function findMountTarget(directoryContent) {
     const fileListBox = directoryContent.parentElement;
-    const latestCommit = fileListBox.querySelector(LATEST_COMMIT_SELECTOR);
-    if (latestCommit === null) return fileListBox;
-
-    const commitRow = latestCommit.parentElement;
-    const trailingControls = commitRow.lastElementChild;
-    return trailingControls === latestCommit ? commitRow : trailingControls;
+    return fileListBox.querySelector(LATEST_COMMIT_SELECTOR) ?? fileListBox;
   }
 
   function refresh() {
